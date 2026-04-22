@@ -29,6 +29,63 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+
+// ================= ANTI CHEAT MODE =================
+let tabSwitchCount = 0;
+let examLocked = false;
+
+// Detect tab switching
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && examLocked) {
+    tabSwitchCount++;
+
+    alert("⚠️ Warning: Do not switch tabs!");
+
+    // auto fail after 3 switches
+    if (tabSwitchCount >= 3) {
+      forceEndExam();
+    }
+  }
+});
+
+// Detect window blur (alt-tab)
+window.addEventListener("blur", () => {
+  if (examLocked) {
+    tabSwitchCount++;
+    console.warn("Tab switch detected:", tabSwitchCount);
+  }
+});
+
+// Block right click
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+// Block copy/paste
+document.addEventListener("copy", e => e.preventDefault());
+document.addEventListener("paste", e => e.preventDefault());
+
+// Optional: block shortcuts
+document.addEventListener("keydown", (e) => {
+  if (examLocked) {
+    if (
+      e.ctrlKey && 
+      (e.key === "c" || e.key === "v" || e.key === "u" || e.key === "s")
+    ) {
+      e.preventDefault();
+    }
+
+    // F12 dev tools
+    if (e.key === "F12") {
+      e.preventDefault();
+    }
+  }
+});
+
+// Force end exam
+function forceEndExam() {
+  alert("🚨 Exam terminated due to suspicious activity");
+  exitExam();
+}
+
 // ================= STATE =================
 let questions = [];
 let index = 0;
@@ -54,6 +111,7 @@ window.login = function () {
       alert(err.message);
       console.error(err);
     });
+    enterFullScreen();
 };
 
 // ================= AUTO LOGIN CHECK =================
@@ -105,6 +163,8 @@ function showQuestion() {
   document.getElementById("options").innerHTML = `
     <textarea id="ans" placeholder="Write answer..."></textarea>
   `;
+     examLocked = true;
+    tabSwitchCount = 0;
 }
 
 // ================= NEXT =================
@@ -176,4 +236,13 @@ window.exitExam = async function () {
 
   document.getElementById("pdfBtn").disabled = true;
   document.getElementById("exitBtn").disabled = true;
+  examLocked = false;
 };
+
+function enterFullScreen() {
+  const el = document.documentElement;
+
+  if (el.requestFullscreen) {
+    el.requestFullscreen();
+  }
+}
