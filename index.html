@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Quiz System</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="loginBox">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email"><br><br>
+        <input type="password" id="password" placeholder="Password"><br><br>
+        <button onclick="login()">Login</button>
+    </div>
+
+  <div class="quiz-container">
+    <h1>Quiz App</h1>
+    
+    <div id="question">Question will appear here</div>
+
+    <div id="options">
+      <!-- options will be added by JS -->
+    </div>
+
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
