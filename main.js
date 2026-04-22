@@ -1,20 +1,19 @@
-// ================= FIREBASE IMPORTS =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
 import {
   getAuth,
   signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 
 import {
   getFirestore,
   collection,
-  addDoc,
-  getDocs
+  getDocs,
+  addDoc
 } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
-// ================= FIREBASE CONFIG =================
+// ================= FIREBASE =================
 const firebaseConfig = {
   apiKey: "AIzaSyDfHxDx1hG-kSCNGl6AecgoE_KC6YY_Wmc",
   authDomain: "smart-quiz-system-12c68.firebaseapp.com",
@@ -32,65 +31,60 @@ const db = getFirestore(app);
 
 // ================= STATE =================
 let questions = [];
-let currentQuestion = 0;
+let index = 0;
 let answers = [];
-
-// ================= STORAGE KEYS =================
-const SESSION_KEY = "exam_session_start";
-const ANSWERS_KEY = "exam_answers";
-const INDEX_KEY = "exam_index";
+let examFinished = false;
 
 // ================= LOGIN =================
 window.login = function () {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("password").value.trim();
 
-  signInWithEmailAndPassword(auth, email, password)
+  if (!email || !pass) {
+    alert("Enter email and password");
+    return;
+  }
+
+  signInWithEmailAndPassword(auth, email, pass)
     .then(() => {
-      document.getElementById("loginBox").style.display = "none";
-      document.querySelector(".quiz-container").style.display = "block";
-
-      localStorage.setItem(SESSION_KEY, Date.now());
-
-      answers = JSON.parse(localStorage.getItem(ANSWERS_KEY)) || [];
-      currentQuestion = Number(localStorage.getItem(INDEX_KEY)) || 0;
-
+      showQuiz();
       loadQuestions();
-      startSessionCheck();
     })
-    .catch(() => {
-      // silent fail (no popup)
+    .catch(err => {
+      alert(err.message);
+      console.error(err);
     });
 };
 
-// ================= LOGOUT =================
-window.logout = function () {
-  signOut(auth);
-
-  document.getElementById("loginBox").style.display = "block";
-  document.querySelector(".quiz-container").style.display = "none";
-
-  clearStorage();
-};
-
-// ================= AUTO RESTORE LOGIN =================
-onAuthStateChanged(auth, (user) => {
+// ================= AUTO LOGIN CHECK =================
+onAuthStateChanged(auth, user => {
   if (user) {
-    document.getElementById("loginBox").style.display = "none";
-    document.querySelector(".quiz-container").style.display = "block";
-
+    showQuiz();
     loadQuestions();
-    startSessionCheck();
   } else {
-    document.getElementById("loginBox").style.display = "block";
-    document.querySelector(".quiz-container").style.display = "none";
+    showLogin();
   }
 });
+
+// ================= UI =================
+function showLogin() {
+  document.getElementById("loginBox").style.display = "block";
+  document.querySelector(".quiz-container").style.display = "none";
+}
+
+function showQuiz() {
+  document.getElementById("loginBox").style.display = "none";
+  document.querySelector(".quiz-container").style.display = "block";
+}
 
 // ================= LOAD QUESTIONS =================
 async function loadQuestions() {
   const snap = await getDocs(collection(db, "questions"));
+
   questions = snap.docs.map(doc => doc.data());
+
+  index = 0;
+  answers = [];
 
   if (!questions.length) {
     document.getElementById("question").innerText = "No questions found";
@@ -102,45 +96,37 @@ async function loadQuestions() {
 
 // ================= SHOW QUESTION =================
 function showQuestion() {
-  const q = questions[currentQuestion];
+  const q = questions[index];
 
-  document.getElementById("question").innerText = q.question || "Missing question";
+  if (!q) return;
+
+  document.getElementById("question").innerText = q.question;
 
   document.getElementById("options").innerHTML = `
-    <textarea id="answerBox"
-      placeholder="Write your answer..."
-      rows="6"
-      style="width:100%; padding:10px; border-radius:10px; font-size:16px;"></textarea>
+    <textarea id="ans" placeholder="Write answer..."></textarea>
   `;
-
-  if (answers[currentQuestion]) {
-    document.getElementById("answerBox").value = answers[currentQuestion].answer;
-  }
 }
 
 // ================= NEXT =================
 document.getElementById("nextBtn").onclick = function () {
-  const answer = document.getElementById("answerBox").value;
+  const ans = document.getElementById("ans").value;
 
-  answers[currentQuestion] = {
-    question: questions[currentQuestion].question,
-    answer: answer
+  answers[index] = {
+    question: questions[index].question,
+    answer: ans
   };
 
-  localStorage.setItem(ANSWERS_KEY, JSON.stringify(answers));
-  localStorage.setItem(INDEX_KEY, currentQuestion + 1);
+  index++;
 
-  currentQuestion++;
-
-  if (currentQuestion < questions.length) {
+  if (index < questions.length) {
     showQuestion();
   } else {
-    finishQuiz();
+    finish();
   }
 };
 
-// ================= FINISH QUIZ =================
-async function finishQuiz() {
+// ================= FINISH =================
+async function finish() {
   document.getElementById("question").innerText = "Exam Finished";
   document.getElementById("options").innerHTML = "";
 
@@ -149,55 +135,45 @@ async function finishQuiz() {
     time: new Date().toISOString()
   });
 
-  document.getElementById("pdfBtn").disabled = false;
+  examFinished = true;
 
-  clearStorage();
+  document.getElementById("pdfBtn").disabled = false;
 }
 
-// ================= PDF DOWNLOAD =================
+// ================= PDF =================
 window.downloadPDF = function () {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
   let y = 10;
 
-  doc.text("Exam Results", 10, y);
+  doc.text("Exam Answers", 10, y);
   y += 10;
 
-  answers.forEach((item, i) => {
-    doc.text(`Q${i + 1}: ${item.question}`, 10, y);
+  answers.forEach((a, i) => {
+    doc.text(`Q${i + 1}: ${a.question}`, 10, y);
     y += 7;
 
-    doc.text(`Ans: ${item.answer}`, 10, y);
+    doc.text(`A: ${a.answer}`, 10, y);
     y += 10;
-
-    if (y > 270) {
-      doc.addPage();
-      y = 10;
-    }
   });
 
-  doc.save("exam-results.pdf");
+  doc.save("exam.pdf");
+
+  document.getElementById("exitBtn").disabled = false;
 };
 
-// ================= SESSION CHECK (1.5 HOURS) =================
-function startSessionCheck() {
-  setInterval(() => {
-    const start = localStorage.getItem(SESSION_KEY);
-    if (!start) return;
+// ================= EXIT (AUTO LOGOUT) =================
+window.exitExam = async function () {
+  await signOut(auth);
 
-    const elapsed = Date.now() - Number(start);
-    const limit = 90 * 60 * 1000;
+  document.getElementById("loginBox").style.display = "block";
+  document.querySelector(".quiz-container").style.display = "none";
 
-    if (elapsed > limit) {
-      logout();
-    }
-  }, 10000);
-}
+  answers = [];
+  index = 0;
+  questions = [];
 
-// ================= CLEAR STORAGE =================
-function clearStorage() {
-  localStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem(ANSWERS_KEY);
-  localStorage.removeItem(INDEX_KEY);
-}
+  document.getElementById("pdfBtn").disabled = true;
+  document.getElementById("exitBtn").disabled = true;
+};

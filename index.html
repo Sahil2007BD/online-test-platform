@@ -2,63 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Smart Quiz System</title>
+  <title>Sahil Dev Exam System</title>
 
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
-  <!-- jsPDF (MUST be before main.js) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
 
-  <!-- ================= LOGIN ================= -->
-    <div id="loginBox" class="login-card">
+<!-- ================= LOGIN ================= -->
+<div id="loginBox">
+  <h1>Sahil Dev</h1>
+  <p>Online Exam Platform</p>
 
-    <div class="brand">
-        <h1>Sahil Dev</h1>
-        <p>Online Exam Platform</p>
-    </div>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
 
-    <div class="login-title">Student Login</div>
+  <button id="loginBtn" onclick="login()">Start Exam</button>
+  <div id="loading" style="display:none;">Loading...</div>
+</div>
 
-    <input type="email" id="email" placeholder="Enter email" />
-    <input type="password" id="password" placeholder="Enter password" />
-
-    <button onclick="login()">Login to Exam</button>
-
-    <div class="footer-text">
-        Secure • Fast • <a href="https://sahil2007bd.github.io/sahildev/" target="_blank">sahil.dev</a>
-    </div>
-
-    </div>
-
-  <!-- ================= QUIZ ================= -->
-  <div class="quiz-container">
+<!-- ================= QUIZ ================= -->
+<div class="quiz-container">
 
   <div class="top-bar">
-    <h1>📝 Online Exam System</h1>
-    <button onclick="logout()">Logout</button>
+    <h2>IT Exam</h2>
   </div>
 
   <div class="exam-box">
-
-    <div id="question">Question will appear here</div>
-
+    <div id="question">Loading...</div>
     <div id="options"></div>
 
+    <button id="nextBtn">Next</button>
     <div class="controls">
-      <button id="nextBtn">Next Question</button>
-      <button id="pdfBtn" onclick="downloadPDF()" disabled>Download PDF</button>
-    </div>
 
+  <button id="pdfBtn" onclick="downloadPDF()" disabled>
+    Download PDF
+  </button>
+
+  <button id="exitBtn" disabled onclick="exitExam()">
+    Exit Exam
+  </button>
+
+</div>
   </div>
 
 </div>
 
-  <!-- Firebase App -->
-  <script type="module" src="main.js"></script>
+<script type="module" src="main.js"></script>
 
 </body>
 </html>
