@@ -1,8 +1,18 @@
 // ================= FIREBASE IMPORTS =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 // ================= FIREBASE CONFIG =================
 const firebaseConfig = {
@@ -37,46 +47,53 @@ window.login = function () {
 
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
-      alert("Login successful ✅");
-
       document.getElementById("loginBox").style.display = "none";
       document.querySelector(".quiz-container").style.display = "block";
 
-      // session start
       localStorage.setItem(SESSION_KEY, Date.now());
 
-      // restore data
       answers = JSON.parse(localStorage.getItem(ANSWERS_KEY)) || [];
       currentQuestion = Number(localStorage.getItem(INDEX_KEY)) || 0;
 
       loadQuestions();
       startSessionCheck();
     })
-    .catch((error) => {
-      alert(error.message);
+    .catch(() => {
+      // silent fail (no popup)
     });
 };
 
 // ================= LOGOUT =================
 window.logout = function () {
-  signOut(auth).then(() => {
-    alert("Logged out ✅");
+  signOut(auth);
 
+  document.getElementById("loginBox").style.display = "block";
+  document.querySelector(".quiz-container").style.display = "none";
+
+  clearStorage();
+};
+
+// ================= AUTO RESTORE LOGIN =================
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById("loginBox").style.display = "none";
+    document.querySelector(".quiz-container").style.display = "block";
+
+    loadQuestions();
+    startSessionCheck();
+  } else {
     document.getElementById("loginBox").style.display = "block";
     document.querySelector(".quiz-container").style.display = "none";
-
-    clearStorage();
-  });
-};
+  }
+});
 
 // ================= LOAD QUESTIONS =================
 async function loadQuestions() {
   const snap = await getDocs(collection(db, "questions"));
-
   questions = snap.docs.map(doc => doc.data());
 
-  if (questions.length === 0) {
-    document.getElementById("question").innerText = "No questions found ❌";
+  if (!questions.length) {
+    document.getElementById("question").innerText = "No questions found";
     return;
   }
 
@@ -87,28 +104,21 @@ async function loadQuestions() {
 function showQuestion() {
   const q = questions[currentQuestion];
 
-  if (!q || !q.question) {
-    document.getElementById("question").innerText = "Question missing ❌";
-    return;
-  }
-
-  document.getElementById("question").innerText = q.question;
+  document.getElementById("question").innerText = q.question || "Missing question";
 
   document.getElementById("options").innerHTML = `
     <textarea id="answerBox"
-      placeholder="Write your answer here..."
+      placeholder="Write your answer..."
       rows="6"
-      style="width:100%; padding:10px; border-radius:10px; font-size:16px;">
-    </textarea>
+      style="width:100%; padding:10px; border-radius:10px; font-size:16px;"></textarea>
   `;
 
-  // restore previous answer if exists
   if (answers[currentQuestion]) {
     document.getElementById("answerBox").value = answers[currentQuestion].answer;
   }
 }
 
-// ================= NEXT BUTTON =================
+// ================= NEXT =================
 document.getElementById("nextBtn").onclick = function () {
   const answer = document.getElementById("answerBox").value;
 
@@ -117,7 +127,6 @@ document.getElementById("nextBtn").onclick = function () {
     answer: answer
   };
 
-  // save locally (NO DATA LOSS)
   localStorage.setItem(ANSWERS_KEY, JSON.stringify(answers));
   localStorage.setItem(INDEX_KEY, currentQuestion + 1);
 
@@ -132,36 +141,30 @@ document.getElementById("nextBtn").onclick = function () {
 
 // ================= FINISH QUIZ =================
 async function finishQuiz() {
-  document.getElementById("question").innerText = "Exam Finished ✅";
+  document.getElementById("question").innerText = "Exam Finished";
   document.getElementById("options").innerHTML = "";
 
   await addDoc(collection(db, "results"), {
-    answers: answers,
+    answers,
     time: new Date().toISOString()
   });
 
+  document.getElementById("pdfBtn").disabled = false;
+
   clearStorage();
-
-  alert("Saved successfully ✅");
-  document.getElementById("pdfBtn").disabled = false; // 🔥 ENABLE HERE
-
-  downloadPDF();
 }
 
-// ================= PDF =================
-function downloadPDF() {
+// ================= PDF DOWNLOAD =================
+window.downloadPDF = function () {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
   let y = 10;
 
-  doc.setFontSize(14);
   doc.text("Exam Results", 10, y);
   y += 10;
 
   answers.forEach((item, i) => {
-    doc.setFontSize(11);
-
     doc.text(`Q${i + 1}: ${item.question}`, 10, y);
     y += 7;
 
@@ -175,7 +178,7 @@ function downloadPDF() {
   });
 
   doc.save("exam-results.pdf");
-}
+};
 
 // ================= SESSION CHECK (1.5 HOURS) =================
 function startSessionCheck() {
@@ -183,11 +186,10 @@ function startSessionCheck() {
     const start = localStorage.getItem(SESSION_KEY);
     if (!start) return;
 
-    const limit = 90 * 60 * 1000;
     const elapsed = Date.now() - Number(start);
+    const limit = 90 * 60 * 1000;
 
     if (elapsed > limit) {
-      alert("Session expired ⏰");
       logout();
     }
   }, 10000);
@@ -199,21 +201,3 @@ function clearStorage() {
   localStorage.removeItem(ANSWERS_KEY);
   localStorage.removeItem(INDEX_KEY);
 }
-
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("User already logged in ✅");
-
-    document.getElementById("loginBox").style.display = "none";
-    document.querySelector(".quiz-container").style.display = "block";
-
-    loadQuestions();
-    startSessionCheck(); // keep timer running
-  } else {
-    console.log("No user ❌");
-
-    document.getElementById("loginBox").style.display = "block";
-    document.querySelector(".quiz-container").style.display = "none";
-  }
-});
