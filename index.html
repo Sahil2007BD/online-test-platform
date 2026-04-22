@@ -3,30 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <title>Smart Quiz System</title>
+
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- jsPDF (MUST be before main.js) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
+
 <body>
 
-    <div id="loginBox">
-        <h2>Login</h2>
-        <input type="email" id="email" placeholder="Email"><br><br>
-        <input type="password" id="password" placeholder="Password"><br><br>
-        <button onclick="login()">Login</button>
-    </div>
+  <!-- ================= LOGIN ================= -->
+  <div id="loginBox">
+    <h2>Login</h2>
 
-  <div class="quiz-container">
-    <h1>Quiz App</h1>
-    
-    <div id="question">Question will appear here</div>
+    <input type="email" id="email" placeholder="Email"><br><br>
+    <input type="password" id="password" placeholder="Password"><br><br>
 
-    <div id="options">
-      <!-- options will be added by JS -->
-    </div>
-
-    <button id="nextBtn">Next</button>
+    <button onclick="login()">Login</button>
   </div>
 
+  <!-- ================= QUIZ ================= -->
+  <div class="quiz-container" style="display:none;">
+    <h1>Quiz App</h1>
+
+    <div id="question">Question will appear here</div>
+
+    <div id="options"></div>
+
+    <button id="nextBtn">Next</button>
+
+    <button onclick="logout()">Logout</button>
+    <button onclick="downloadPDF()">Download PDF</button>
+  </div>
+
+  <!-- Firebase App -->
   <script type="module" src="main.js"></script>
+
 </body>
 </html>
