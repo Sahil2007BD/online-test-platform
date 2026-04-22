@@ -24,18 +24,27 @@
   </div>
 
   <!-- ================= QUIZ ================= -->
-  <div class="quiz-container" style="display:none;">
-    <h1>Quiz App</h1>
+  <div class="quiz-container">
+
+  <div class="top-bar">
+    <h1>📝 Online Exam System</h1>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div class="exam-box">
 
     <div id="question">Question will appear here</div>
 
     <div id="options"></div>
 
-    <button id="nextBtn">Next</button>
+    <div class="controls">
+      <button id="nextBtn">Next Question</button>
+      <button id="pdfBtn" onclick="downloadPDF()" disabled>Download PDF</button>
+    </div>
 
-    <button onclick="logout()">Logout</button>
-    <button onclick="downloadPDF()">Download PDF</button>
   </div>
+
+</div>
 
   <!-- Firebase App -->
   <script type="module" src="main.js"></script>

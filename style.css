@@ -6,85 +6,123 @@
 }
 
 body {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  min-height: 100vh;
   background: linear-gradient(135deg, #0b1220, #0f1b33);
   color: #fff;
 }
 
+/* ================= LOGIN ================= */
+#loginBox {
+  width: 320px;
+  margin: 120px auto;
+  padding: 30px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
 
-
+/* ================= QUIZ FULL SCREEN ================= */
 .quiz-container {
   display: none;
+  min-height: 100vh;
+  padding: 20px;
 }
 
-
-
-/* MAIN CARD */
-.quiz-container {
-  width: 380px;
-  padding: 25px;
-  border-radius: 20px;
-  backdrop-filter: blur(15px);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  text-align: center;
-  transition: 0.3s;
-}
-
-.quiz-container:hover {
-  transform: translateY(-5px);
-}
-
-/* TITLE */
-.quiz-container h1 {
-  font-size: 24px;
+/* TOP BAR */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.06);
+  padding: 15px 20px;
+  border-radius: 12px;
   margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.top-bar h1 {
+  font-size: 22px;
   color: #60a5fa;
+}
+
+/* ================= EXAM BOX ================= */
+.exam-box {
+  max-width: 900px;
+  margin: auto;
+  padding: 30px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 /* QUESTION */
 #question {
-  font-size: 18px;
+  font-size: 22px;
   margin-bottom: 20px;
+  line-height: 1.6;
 }
 
-/* OPTIONS */
-#options button {
-  display: block;
+/* ANSWER AREA */
+textarea {
   width: 100%;
-  margin: 8px 0;
-  padding: 12px;
+  min-height: 220px;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+  background: rgba(0,0,0,0.3);
+  color: white;
+  resize: none;
+}
+
+/* ================= BUTTONS ================= */
+.controls {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 12px 18px;
   border: none;
   border-radius: 10px;
-  background: rgba(255,255,255,0.08);
-  color: white;
   cursor: pointer;
-  transition: 0.25s;
-}
-
-#options button:hover {
   background: #3b82f6;
-  transform: scale(1.03);
-}
-
-/* NEXT BUTTON */
-#nextBtn {
-  margin-top: 15px;
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
-  font-weight: bold;
-  cursor: pointer;
+  font-size: 14px;
   transition: 0.3s;
 }
 
-#nextBtn:hover {
+button:hover {
+  background: #2563eb;
   transform: scale(1.05);
+}
+
+/* NEXT BUTTON SPECIAL */
+#nextBtn {
+  flex: 1;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  font-weight: bold;
+}
+
+#nextBtn:hover {
   box-shadow: 0 0 15px rgba(59,130,246,0.6);
+}
+
+/* ================= REMOVE OLD CARD STYLE ================= */
+.quiz-container {
+  width: 100%;
+}
+
+
+button:disabled {
+  background: gray;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.6;
 }
