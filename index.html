@@ -19,7 +19,7 @@
 
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Password">
-
+    <input type="number" id="examTime" placeholder="Time (minutes)" />
   <button id="loginBtn" onclick="login()">Start Exam</button>
   <div id="loading" style="display:none;">Loading...</div>
 
@@ -28,6 +28,12 @@
 
 <!-- ================= QUIZ ================= -->
 <div class="quiz-container">
+    <div class="timer-bar">
+  <div id="timeText">Time Left: 00:00</div>
+  <div class="progress">
+    <div id="progressFill"></div>
+  </div>
+</div>
 
   <div class="top-bar">
     <h2>IT Exam</h2>
@@ -40,13 +46,10 @@
     <button id="nextBtn">Next</button>
     <div class="controls">
 
-  <button id="pdfBtn" onclick="downloadPDF()" disabled>
-    Download PDF
-  </button>
 
-  <button id="exitBtn" disabled onclick="exitExam()">
-    Exit Exam
-  </button>
+<button id="exitBtn" onclick="exitExam()" disabled>
+  Exit Exam
+</button>
 
 </div>
   </div>

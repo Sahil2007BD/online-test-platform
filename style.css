@@ -94,3 +94,31 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.timer-bar {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+#timeText {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.progress {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+#progressFill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  transition: width 1s linear;
+}
