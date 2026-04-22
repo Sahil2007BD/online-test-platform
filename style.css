@@ -126,3 +126,87 @@ button:disabled {
   transform: none;
   opacity: 0.6;
 }
+
+/* ================= PREMIUM LOGIN ================= */
+
+.login-card {
+  width: 360px;
+  padding: 30px;
+  border-radius: 20px;
+  margin: 120px auto;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  text-align: center;
+  animation: fadeIn 0.6s ease;
+}
+
+/* BRAND */
+.brand h1 {
+  font-size: 28px;
+  color: #60a5fa;
+  letter-spacing: 1px;
+}
+
+.brand p {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 20px;
+}
+
+/* TITLE */
+.login-title {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+/* INPUTS */
+.login-card input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  background: rgba(0,0,0,0.3);
+  color: white;
+}
+
+/* BUTTON */
+.login-card button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-card button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(59,130,246,0.6);
+}
+
+/* FOOTER */
+.footer-text {
+  margin-top: 15px;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+/* ANIMATION */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
