@@ -4,29 +4,52 @@
   <meta charset="UTF-8">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="admin.css">
-
-
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-  <h1>Admin Dashboard</h1>
+<div class="container">
 
-  <!-- ADD QUESTION -->
-  <div class="box">
-    <h3>Add Question</h3>
+  <h1>📚 Exam Admin Panel</h1>
 
-    <input id="q" placeholder="Enter question">
+  <div class="grid">
 
-    <br>
+    <!-- ================= MCQ SECTION ================= -->
+    <div class="card mcq">
+      <h2>🟦 MCQ Builder</h2>
 
-    <button onclick="addQuestion()">Upload Question</button>
+      <input id="mcq_q" placeholder="Question">
+
+      <input id="mcq_op1" placeholder="Option 1">
+      <input id="mcq_op2" placeholder="Option 2">
+      <input id="mcq_op3" placeholder="Option 3">
+      <input id="mcq_op4" placeholder="Option 4">
+
+      <input id="mcq_correct" placeholder="Correct Answer">
+
+      <button onclick="addMCQ()">Upload MCQ</button>
+    </div>
+
+    <!-- ================= THEORY SECTION ================= -->
+    <div class="card theory">
+      <h2>🟩 Theory Builder</h2>
+
+      <input id="th_q" placeholder="Question">
+
+      <textarea id="th_ans" placeholder="Model Answer"></textarea>
+
+      <button onclick="addTheory()">Upload Theory</button>
+    </div>
+
   </div>
 
-  <!-- LIVE LIST -->
+  <h2 class="live-title">Live Questions</h2>
   <div id="list"></div>
 
-  <script type="module" src="admin.js"></script>
+</div>
+
+<script type="module" src="admin.js"></script>
 
 </body>
 </html>

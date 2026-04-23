@@ -1,59 +1,84 @@
-  body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: white;
+}
 
-    h1 {
-      margin-bottom: 20px;
-    }
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
 
-    .box {
-      margin: 20px auto;
-      max-width: 500px;
-      background: rgba(255,255,255,0.05);
-      padding: 20px;
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-    }
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-    input {
-      width: 80%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 10px;
-    }
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
 
-    button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 8px;
-      background: #3b82f6;
-      color: white;
-      cursor: pointer;
-      margin: 5px;
-    }
+.card {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(15px);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
 
-    #list {
-      margin-top: 20px;
-    }
+.card h2 {
+  margin-bottom: 15px;
+}
 
-    .item {
-      background: rgba(255,255,255,0.07);
-      padding: 10px;
-      margin: 10px auto;
-      width: 80%;
-      border-radius: 8px;
-      text-align: left;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+input, textarea {
+  width: 100%;
+  margin: 6px 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(0,0,0,0.4);
+  color: white;
+  outline: none;
+}
 
-    .delete {
-      background: crimson;
-    }
+textarea {
+  height: 120px;
+  resize: none;
+}
+
+button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:hover {
+  background: #2563eb;
+}
+
+.live-title {
+  margin-top: 30px;
+}
+
+#list div {
+  background: rgba(255,255,255,0.05);
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+}
+
+#list button {
+  width: auto;
+  margin-top: 8px;
+  background: crimson;
+}
