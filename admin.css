@@ -1,3 +1,30 @@
+* {
+  box-sizing: border-box;
+}
+
+.card {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* FIX INPUT STABILITY */
+input, textarea {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
+/* PREVENT SHRINKING IN GRID */
+.grid {
+  align-items: start;
+}
+
+/* EXTRA SAFETY FOR MODERN BROWSERS */
+input, textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
 body {
   margin: 0;
   font-family: "Poppins", sans-serif;
@@ -5,44 +32,85 @@ body {
   color: white;
 }
 
+/* ================= LAYOUT ================= */
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: auto;
-  padding: 20px;
+  padding: 30px 20px;
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 20px;
+  font-size: 28px;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
 }
 
+/* ================= GRID ================= */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 25px;
 }
 
+.item {
+  padding: 12px;
+  margin: 10px 0;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  border-left: 3px solid #3b82f6;
+}
+
+.item small {
+  opacity: 0.7;
+}
+
+.item button {
+  width: auto;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+/* ================= CARDS ================= */
 .card {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(15px);
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  transition: 0.3s ease;
 }
 
+.card:hover {
+  transform: translateY(-3px);
+  border: 1px solid rgba(59,130,246,0.4);
+}
+
+/* ================= HEADINGS ================= */
 .card h2 {
   margin-bottom: 15px;
+  font-size: 18px;
+  color: #93c5fd;
 }
 
+/* ================= INPUTS ================= */
 input, textarea {
   width: 100%;
-  margin: 6px 0;
-  padding: 10px;
-  border-radius: 10px;
+  margin: 8px 0;
+  padding: 12px 14px;
+  border-radius: 12px;
   border: none;
+  outline: none;
   background: rgba(0,0,0,0.4);
   color: white;
-  outline: none;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+input:focus, textarea:focus {
+  background: rgba(0,0,0,0.55);
+  box-shadow: 0 0 0 2px #3b82f6;
 }
 
 textarea {
@@ -50,35 +118,80 @@ textarea {
   resize: none;
 }
 
+/* ================= BUTTON ================= */
 button {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 12px;
   padding: 12px;
   border: none;
-  border-radius: 10px;
-  background: #3b82f6;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
   cursor: pointer;
   font-weight: 600;
+  transition: 0.25s ease;
 }
 
 button:hover {
-  background: #2563eb;
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(59,130,246,0.4);
 }
 
+/* ================= LIVE LIST ================= */
 .live-title {
   margin-top: 30px;
+  font-size: 18px;
+  color: #93c5fd;
+}
+
+#list {
+  margin-top: 10px;
 }
 
 #list div {
   background: rgba(255,255,255,0.05);
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 10px;
+  padding: 14px;
+  margin: 12px 0;
+  border-radius: 14px;
+  border-left: 3px solid #3b82f6;
+  transition: 0.2s;
 }
 
+#list div:hover {
+  transform: translateX(3px);
+}
+
+/* ================= DELETE BUTTON ================= */
 #list button {
   width: auto;
   margin-top: 8px;
+  padding: 8px 12px;
   background: crimson;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+#list button:hover {
+  background: #e11d48;
+}
+
+/* ================= MCQ BADGE STYLE (optional) ================= */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 8px;
+  background: rgba(59,130,246,0.2);
+  color: #93c5fd;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    padding: 15px;
+  }
 }
