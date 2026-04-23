@@ -21,13 +21,19 @@
   <input type="password" id="password" placeholder="Password">
     <input type="number" id="examTime" placeholder="Time (minutes)" />
   <button id="loginBtn" onclick="login()">Start Exam</button>
+<!-- Admin Button -->
+<button class="admin-btn" onclick="openAdmin()">
+  Admin Login
+</button>
   <div id="loading" style="display:none;">Loading...</div>
 
 
 </div>
 
 <!-- ================= QUIZ ================= -->
+
 <div class="quiz-container">
+    <div id="sidebar"></div>
     <div class="timer-bar">
   <div id="timeText">Time Left: 00:00</div>
   <div class="progress">
@@ -40,9 +46,10 @@
   </div>
 
   <div class="exam-box">
+     <div id="qCounter"></div>
     <div id="question">Loading...</div>
     <div id="options"></div>
-
+    <button id="backBtn">Back</button>
     <button id="nextBtn">Next</button>
     <div class="controls">
 
@@ -54,6 +61,21 @@
 </div>
   </div>
 
+</div>
+
+
+
+<!-- ADMIN POPUP -->
+<div id="adminModal" class="modal">
+  <div class="modal-box">
+    <h2>Admin Login</h2>
+
+    <input type="email" id="adminEmail" placeholder="Admin Email">
+    <input type="password" id="adminPass" placeholder="Password">
+
+    <button onclick="adminLogin()">Login</button>
+    <button class="close-btn" onclick="closeAdmin()">Cancel</button>
+  </div>
 </div>
 
 <script type="module" src="main.js"></script>

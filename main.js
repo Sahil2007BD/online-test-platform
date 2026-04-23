@@ -18,25 +18,82 @@ const firebaseConfig = {
   apiKey: "AIzaSyDfHxDx1hG-kSCNGl6AecgoE_KC6YY_Wmc",
   authDomain: "smart-quiz-system-12c68.firebaseapp.com",
   projectId: "smart-quiz-system-12c68",
-  storageBucket: "smart-quiz-system-12c68.appspot.com",
+  storageBucket: "smart-quiz-system-12c68.firebasestorage.app",
   messagingSenderId: "738008992865",
-  appId: "1:738008992865:web:51e70d8ee85b4bf3326e20"
+  appId: "1:738008992865:web:51e70d8ee85b4bf3326e20",
+  measurementId: "G-R561C2HHLM"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+let isAdmin = false;
 
 /* ================= STATE ================= */
 let questions = [];
 let index = 0;
 let answers = [];
-
 let totalTime = 0;
 let timeLeft = 0;
 let timer = null;
-
 let examSubmitted = false;
+
+const STORAGE_KEY = "exam_data";
+
+/* ================= ADMIN POPUP ================= */
+window.openAdmin = () => {
+  document.getElementById("adminModal").style.display = "flex";
+};
+
+window.closeAdmin = () => {
+  document.getElementById("adminModal").style.display = "none";
+};
+
+/* ================= ADMIN LOGIN ================= */
+window.adminLogin = async function () {
+  const email = document.getElementById("adminEmail").value;
+  const pass = document.getElementById("adminPass").value;
+
+  if (email !== "admin@gmail.com") {
+    alert("Not authorized");
+    return;
+  }
+
+  try {
+    isAdmin = true; // 🔥 mark as admin
+
+    await signInWithEmailAndPassword(auth, email, pass);
+
+    window.location.href = "admin.html"; // go to dashboard
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+/* ================= LOGIN ================= */
+window.login = async function () {
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  const inputTime = Number(document.getElementById("examTime").value);
+
+  if (!email || !pass) return alert("Enter login details");
+  if (!inputTime || inputTime <= 0) return alert("Enter valid time");
+
+  totalTime = inputTime * 60;
+  timeLeft = totalTime;
+
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+    startExam();
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+/* ================= AUTH ================= */
+onAuthStateChanged(auth, user => {
+  if (!user) showLogin();
+});
 
 /* ================= UI ================= */
 function showLogin() {
@@ -49,29 +106,6 @@ function showQuiz() {
   document.querySelector(".quiz-container").style.display = "block";
 }
 
-/* ================= LOGIN ================= */
-window.login = async function () {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
-  const inputTime = Number(document.getElementById("examTime").value);
-
-  if (!email || !pass) return alert("Enter login details");
-  if (!inputTime || inputTime <= 0) return alert("Enter valid time");
-
-  totalTime = inputTime * 60;
-  timeLeft = totalTime;
-
-  await signInWithEmailAndPassword(auth, email, pass);
-
-  startExam();
-};
-
-/* ================= AUTH CHECK ================= */
-onAuthStateChanged(auth, user => {
-  if (user) showLogin();
-  else showLogin();
-});
-
 /* ================= START EXAM ================= */
 async function startExam() {
   showQuiz();
@@ -79,14 +113,32 @@ async function startExam() {
   const snap = await getDocs(collection(db, "questions"));
   questions = snap.docs.map(d => d.data());
 
-  index = 0;
-  answers = [];
+  loadFromLocal();
+
   examSubmitted = false;
 
-  enterFullScreen(); // 🔥 ADD THIS
-
+  enterFullScreen();
   startTimer();
   showQuestion();
+  createSidebar();
+}
+
+/* ================= LOCAL STORAGE ================= */
+function saveToLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    answers,
+    index,
+    timeLeft
+  }));
+}
+
+function loadFromLocal() {
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if (data) {
+    answers = data.answers || [];
+    index = data.index || 0;
+    timeLeft = data.timeLeft || timeLeft;
+  }
 }
 
 /* ================= SHOW QUESTION ================= */
@@ -100,32 +152,72 @@ function showQuestion() {
     <textarea id="ans" placeholder="Write your answer..."></textarea>
   `;
 
-  const btn = document.getElementById("nextBtn");
-  btn.innerText = "Next";
-  btn.onclick = nextQuestion;
+  if (answers[index]) {
+    document.getElementById("ans").value = answers[index].answer;
+  }
+
+  document.getElementById("qCounter").innerText =
+    `Q ${index + 1} / ${questions.length}`;
+
+  document.getElementById("backBtn").disabled = index === 0;
+
+  document.getElementById("nextBtn").innerText = "Next";
+  document.getElementById("nextBtn").onclick = nextQuestion;
 }
 
-/* ================= NEXT ================= */
-function nextQuestion() {
+/* ================= SAVE ================= */
+function saveCurrentAnswer() {
   answers[index] = {
     question: questions[index].question,
     answer: document.getElementById("ans").value
   };
+  saveToLocal();
+}
 
+/* ================= NEXT ================= */
+function nextQuestion() {
+  saveCurrentAnswer();
   index++;
 
-  if (index >= questions.length) {
-    finishExam();
-  } else {
+  if (index >= questions.length) finishExam();
+  else showQuestion();
+}
+
+/* ================= BACK ================= */
+document.getElementById("backBtn").onclick = () => {
+  saveCurrentAnswer();
+  if (index > 0) {
+    index--;
     showQuestion();
   }
+};
+
+/* ================= SIDEBAR ================= */
+function createSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.innerHTML = "";
+
+  questions.forEach((_, i) => {
+    const btn = document.createElement("button");
+    btn.innerText = i + 1;
+
+    if (answers[i]) btn.classList.add("answered");
+
+    btn.onclick = () => {
+      saveCurrentAnswer();
+      index = i;
+      showQuestion();
+    };
+
+    sidebar.appendChild(btn);
+  });
 }
 
 /* ================= FINISH ================= */
 async function finishExam() {
   if (examSubmitted) return;
-  examSubmitted = true;
 
+  examSubmitted = true;
   clearInterval(timer);
 
   document.getElementById("question").innerText = "Exam Finished ✅";
@@ -140,30 +232,27 @@ async function finishExam() {
   btn.innerText = "Download PDF";
   btn.onclick = downloadPDF;
 
-  // 🚫 EXIT STILL DISABLED HERE
   document.getElementById("exitBtn").disabled = true;
 }
+
 /* ================= PDF ================= */
 window.downloadPDF = function () {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
   let y = 10;
-
   doc.text("Exam Results", 10, y);
   y += 10;
 
   answers.forEach((a, i) => {
     doc.text(`Q${i + 1}: ${a.question}`, 10, y);
     y += 7;
-
     doc.text(`A: ${a.answer}`, 10, y);
     y += 10;
   });
 
   doc.save("exam.pdf");
 
-  // ✅ NOW ENABLE EXIT AFTER DOWNLOAD
   document.getElementById("exitBtn").disabled = false;
 };
 
@@ -180,6 +269,8 @@ function startTimer() {
     document.getElementById("timeText").innerText =
       `Time Left: ${min}:${sec < 10 ? "0" + sec : sec}`;
 
+    saveToLocal();
+
     if (timeLeft <= 0) {
       clearInterval(timer);
       finishExam();
@@ -190,37 +281,12 @@ function startTimer() {
 /* ================= EXIT ================= */
 window.exitExam = async function () {
   await signOut(auth);
-
-  answers = [];
-  index = 0;
-  questions = [];
-  examSubmitted = false;
-
-  document.getElementById("nextBtn").innerText = "Next";
-  document.getElementById("exitBtn").disabled = true;
-
-  showLogin();
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
 };
 
+/* ================= FULLSCREEN ================= */
 function enterFullScreen() {
   const el = document.documentElement;
-
-  if (el.requestFullscreen) {
-    el.requestFullscreen();
-  } else if (el.webkitRequestFullscreen) {
-    el.webkitRequestFullscreen();
-  } else if (el.msRequestFullscreen) {
-    el.msRequestFullscreen();
-  }
+  if (el.requestFullscreen) el.requestFullscreen();
 }
-
-document.addEventListener("fullscreenchange", () => {
-  if (!document.fullscreenElement && examSubmitted === false) {
-    alert("⚠️ You exited full screen. Please return to exam mode.");
-
-    // try forcing back again
-    setTimeout(() => {
-      enterFullScreen();
-    }, 1000);
-  }
-});

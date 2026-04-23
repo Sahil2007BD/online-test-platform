@@ -45,6 +45,87 @@ body {
 }
 
 /* ================= QUIZ ================= */
+#sidebar {
+  position: fixed;
+  right: 20px;
+  top: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* MODAL BACKGROUND */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* BOX */
+.modal-box {
+  width: 300px;
+  padding: 25px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(15px);
+  text-align: center;
+}
+
+/* INPUT */
+.modal-box input {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(0,0,0,0.4);
+  color: white;
+}
+.modal {
+  display: none;
+}
+
+/* CLOSE BUTTON */
+.close-btn {
+  margin-top: 10px;
+  background: crimson;
+}
+
+
+.admin-btn {
+  width: 100%;
+  margin-top: 10px;
+  background: transparent;
+  border: 1px solid #3b82f6;
+  color: #3b82f6;
+}
+
+.admin-btn:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+#sidebar button {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #1f2937;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#sidebar button.answered {
+  background: #3b82f6;
+}
+
+
 .quiz-container {
   display: none;
   width: 90%;
