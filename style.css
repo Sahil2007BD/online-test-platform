@@ -216,14 +216,17 @@ button:disabled {
     height: 160px;
   }
 
-  #sidebar {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    flex-direction: row;
-    overflow-x: auto;
-    max-width: 90%;
-  }
+ #sidebar {
+  position: fixed;
+  right: 10px;
+  top: 100px;
+  max-height: 70vh;   /* important */
+  overflow-y: auto;   /* enables scrolling */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 5px;
+}
 
   #sidebar button {
     flex-shrink: 0;
@@ -236,4 +239,44 @@ button:disabled {
   .exam-box {
     padding: 15px;
   }
+}
+
+/* optional: better scroll look */
+#sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 10px;
+}
+
+#sidebar {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.mcq-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mcq-option {
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid transparent;
+}
+
+.mcq-option:hover {
+  transform: scale(1.02);
+  border-color: #3b82f6;
+}
+
+.mcq-option.selected {
+  background: #3b82f6;
+  color: white;
 }
