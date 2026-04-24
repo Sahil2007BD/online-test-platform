@@ -83,6 +83,7 @@ function showRules() {
       <h2>Exam Rules</h2>
       <p>No tab switching</p>
       <p>No copy/paste</p>
+      <p>Auto Submit after 3 violations</p>
       <h3>Starting in <span id="c">5</span></h3>
     </div>
   `;
