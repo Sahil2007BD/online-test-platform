@@ -13,7 +13,6 @@
 <body>
 
 <!-- ================= LOGIN ================= -->
-<!-- ================= LOGIN ================= -->
 <div id="loginBox">
   <h1>Sahil Dev</h1>
   <p>Exam Platform</p>
@@ -25,9 +24,7 @@
 
   <button id="loginBtn" onclick="login()">Start Exam</button>
 
-  <button class="admin-btn" onclick="openAdmin()">
-    Admin Login
-  </button>
+  <button class="admin-btn" onclick="openAdmin()">Admin Login</button>
 </div>
 
 <!-- ================= QUIZ ================= -->
@@ -59,14 +56,12 @@
   </div>
 </div>
 
-<!-- ================= ADMIN MODAL ================= -->
+<!-- ================= ADMIN ================= -->
 <div id="adminModal" class="modal">
   <div class="modal-box">
     <h2>Admin Login</h2>
-
     <input type="email" id="adminEmail" placeholder="Admin Email">
     <input type="password" id="adminPass" placeholder="Password">
-
     <button onclick="adminLogin()">Login</button>
     <button class="close-btn" onclick="closeAdmin()">Cancel</button>
   </div>
@@ -74,41 +69,7 @@
 
 <script type="module" src="main.js"></script>
 
-<!-- ================= QUIZ ================= -->
-
-<div class="quiz-container">
-    <div id="sidebar"></div>
-    <div class="timer-bar">
-  <div id="timeText">Time Left: 00:00</div>
-  <div class="progress">
-    <div id="progressFill"></div>
-  </div>
-</div>
-
-  <div class="top-bar">
-    <h2>IT Exam</h2>
-  </div>
-
-  <div class="exam-box">
-     <div id="qCounter"></div>
-    <div id="question">Loading...</div>
-    <div id="options"></div>
-    <button id="backBtn">Back</b  utton>
-    <button id="nextBtn">Next</button>
-    <div class="controls">
-
-
-<button id="exitBtn" onclick="exitExam()" disabled>
-  Exit Exam
-</button>
-
-</div>
-  </div>
-
-</div>
-
-
-<script type="module" src="main.js"></script>
+<div id="fullscreenOverlay" style="display:none"></div>
 
 </body>
 </html>

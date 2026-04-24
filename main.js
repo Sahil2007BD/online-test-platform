@@ -2,8 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/fireba
 import {
   getAuth,
   signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 
 import {
@@ -30,27 +29,43 @@ const db = getFirestore(app);
 let questions = [];
 let index = 0;
 let answers = [];
-let timeLeft = 1800;
+let timeLeft = 0;
+let totalTime = 0;
 let timer = null;
 let examStarted = false;
-
-const EXAM_KEY = "exam_active";
-const STATE_KEY = "exam_state";
-
-/* ================= TAB SWITCH CONTROL ================= */
 let tabSwitchCount = 0;
+
+/* ================= FULLSCREEN ================= */
+function enterFullscreen() {
+  const el = document.documentElement;
+
+  if (el.requestFullscreen) {
+    el.requestFullscreen().catch(() => {});
+  } 
+  else if (el.webkitRequestFullscreen) {
+    el.webkitRequestFullscreen();
+  } 
+  else if (el.msRequestFullscreen) {
+    el.msRequestFullscreen();
+  }
+}
 
 /* ================= LOGIN ================= */
 window.login = async function () {
   const email = document.getElementById("email").value;
   const pass = document.getElementById("password").value;
-  const studentName = document.getElementById("studentName")?.value || "Unknown";
+  const studentName = document.getElementById("studentName")?.value || "Student";
+  const examMinutes = parseInt(document.getElementById("examTime").value);
+
+  if (!examMinutes) return alert("Enter valid time");
 
   try {
     await signInWithEmailAndPassword(auth, email, pass);
 
-    sessionStorage.setItem(EXAM_KEY, "1");
     sessionStorage.setItem("studentName", studentName);
+
+    totalTime = examMinutes * 60;
+    timeLeft = totalTime;
 
     showRules();
   } catch (e) {
@@ -64,11 +79,10 @@ function showRules() {
 
   const box = document.createElement("div");
   box.innerHTML = `
-    <div style="padding:20px;background:#111;color:white;text-align:center">
+    <div style="padding:20px;background:#111;color:#fff;text-align:center">
       <h2>Exam Rules</h2>
-      <p>No tab switching allowed</p>
-      <p>No copy/paste allowed</p>
-      <p>Auto submit after 2 warnings</p>
+      <p>No tab switching</p>
+      <p>No copy/paste</p>
       <h3>Starting in <span id="c">5</span></h3>
     </div>
   `;
@@ -77,9 +91,7 @@ function showRules() {
   let c = 5;
   const i = setInterval(() => {
     c--;
-    const el = document.getElementById("c");
-    if (el) el.innerText = c;
-
+    document.getElementById("c").innerText = c;
     if (c <= 0) {
       clearInterval(i);
       box.remove();
@@ -90,32 +102,33 @@ function showRules() {
 
 /* ================= START ================= */
 async function startExam() {
-  if (examStarted) return;
   examStarted = true;
 
   document.querySelector(".quiz-container").style.display = "block";
 
   const snap = await getDocs(collection(db, "questions"));
-  questions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  questions = snap.docs.map(d => d.data());
 
-  const saved = JSON.parse(localStorage.getItem(STATE_KEY));
+  answers = new Array(questions.length).fill(null);
 
-  if (saved) {
-    index = saved.index || 0;
-    answers = saved.answers || [];
-    timeLeft = saved.timeLeft || 1800;
-  }
+  index = 0;
 
   render();
   buildSidebar();
+  bindButtons();
   startTimer();
 
-  setTimeout(() => {
-    document.documentElement.requestFullscreen?.();
-  }, 300);
+  document.getElementById("exitBtn").disabled = true;
 
-  bindButtons();
+  setTimeout(() => enterFullscreen(), 300);
 }
+
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement && examStarted) {
+    alert("Please stay in fullscreen!");
+    enterFullscreen();
+  }
+});
 
 /* ================= RENDER ================= */
 function render() {
@@ -127,93 +140,29 @@ function render() {
 
   document.getElementById("question").innerText = q.question;
 
-if (q.type === "mcq") {
-  document.getElementById("options").innerHTML = `
-    <div style="
-      display: grid;
-      gap: 12px;
-      margin-top: 15px;
-    ">
-      ${q.options.map((opt, i) => `
-        <div onclick="selectMCQ('${opt}')"
-          style="
-            padding: 14px 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            color: white;
-            background: ${
-              answers[index]?.answer === opt
-                ? 'linear-gradient(135deg,#00c853,#009624)'
-                : 'linear-gradient(135deg,#2b2b2b,#1c1c1c)'
-            };
-            border: 1px solid ${
-              answers[index]?.answer === opt ? '#00e676' : '#444'
-            };
-            transition: all 0.2s ease;
-            box-shadow: ${
-              answers[index]?.answer === opt
-                ? '0 0 12px rgba(0,255,100,0.4)'
-                : 'none'
-            };
-          "
-          onmouseover="this.style.transform='scale(1.02)'"
-          onmouseout="this.style.transform='scale(1)'"
-        >
-          <span style="
-            display:inline-block;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            text-align:center;
-            line-height:26px;
-            margin-right:10px;
-            font-size:13px;
-          ">
-            ${String.fromCharCode(65 + i)}
-          </span>
+  const optBox = document.getElementById("options");
 
-          ${opt}
-        </div>
-      `).join("")}
-    </div>
-  `;
-} else {
-    document.getElementById("options").innerHTML =
-      `<textarea id="ans">${answers[index]?.answer || ""}</textarea>`;
+  if (q.type === "mcq") {
+    optBox.innerHTML = q.options.map((opt, i) => `
+      <div onclick="selectMCQ('${opt}')"
+        style="padding:12px;margin:8px 0;cursor:pointer;
+        background:${answers[index] === opt ? 'green' : '#222'}">
+        ${String.fromCharCode(65 + i)}. ${opt}
+      </div>
+    `).join("");
+  } else {
+    optBox.innerHTML = `<textarea id="ans">${answers[index] || ""}</textarea>`;
   }
 
-  saveState();
+  updateButtons();
 }
 
-/* ================= MCQ FIXED ================= */
-window.selectMCQ = function (value) {
-  answers[index] = {
-    question: questions[index].question,
-    answer: value
-  };
-
+/* ================= MCQ ================= */
+window.selectMCQ = function (v) {
+  answers[index] = v;
   render();
   buildSidebar();
-  saveState();
 };
-
-/* ================= SAVE ================= */
-function save() {
-  const q = questions[index];
-  if (!q) return;
-
-  answers[index] = {
-    question: q.question,
-    answer: q.type === "mcq"
-      ? answers[index]?.answer || ""
-      : document.getElementById("ans")?.value || ""
-  };
-
-  saveState();
-}
 
 /* ================= NAV ================= */
 function nextQuestion() {
@@ -230,7 +179,6 @@ function nextQuestion() {
 
 function prevQuestion() {
   save();
-
   if (index > 0) {
     index--;
     render();
@@ -238,29 +186,55 @@ function prevQuestion() {
   }
 }
 
-/* ================= BUTTON BIND ================= */
+/* ================= SAVE ================= */
+function save() {
+  const q = questions[index];
+  if (!q) return;
+
+  answers[index] =
+    q.type === "mcq"
+      ? answers[index]
+      : document.getElementById("ans")?.value || "";
+}
+
+/* ================= BUTTON CONTROL ================= */
 function bindButtons() {
   document.getElementById("nextBtn").onclick = nextQuestion;
   document.getElementById("backBtn").onclick = prevQuestion;
+  document.getElementById("exitBtn").onclick = exitExam;
+}
+
+/* ================= UPDATE BUTTON STATE ================= */
+function updateButtons() {
+  const nextBtn = document.getElementById("nextBtn");
+
+  if (index === questions.length - 1) {
+    nextBtn.innerText = "Download";
+    nextBtn.onclick = downloadPDF;
+  } else {
+    nextBtn.innerText = "Next";
+    nextBtn.onclick = nextQuestion;
+  }
 }
 
 /* ================= SIDEBAR ================= */
 function buildSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.innerHTML = "";
+  const side = document.getElementById("sidebar");
+  side.innerHTML = "";
 
   questions.forEach((_, i) => {
-    const btn = document.createElement("button");
-    btn.innerText = i + 1;
-    btn.style.background = answers[i]?.answer ? "green" : "#333";
+    const b = document.createElement("button");
+    b.innerText = i + 1;
+    b.style.background = answers[i] ? "green" : "#333";
 
-    btn.onclick = () => {
+    b.onclick = () => {
       save();
       index = i;
       render();
+      buildSidebar();
     };
 
-    sidebar.appendChild(btn);
+    side.appendChild(b);
   });
 }
 
@@ -274,12 +248,21 @@ function startTimer() {
     const m = Math.floor(timeLeft / 60);
     const s = timeLeft % 60;
 
-    document.getElementById("timeText").innerText =
-      `Time: ${m}:${s < 10 ? "0" + s : s}`;
+    const timeText = document.getElementById("timeText");
+    timeText.innerText = `Time: ${m}:${s < 10 ? "0" + s : s}`;
 
-    saveState();
+    // 🔴 LAST 10 MIN WARNING
+    if (timeLeft <= 600) {
+      timeText.style.color = "red";
+      timeText.style.fontWeight = "bold";
+    } else {
+      timeText.style.color = "white";
+      timeText.style.fontWeight = "normal";
+    }
 
-    if (timeLeft <= 0) finishExam();
+    if (timeLeft <= 0) {
+      finishExam();
+    }
   }, 1000);
 }
 
@@ -290,91 +273,64 @@ function finishExam() {
   document.getElementById("question").innerText = "Exam Finished";
   document.getElementById("options").innerHTML = "";
 
-  const nextBtn = document.getElementById("nextBtn");
-  const backBtn = document.getElementById("backBtn");
-  const exitBtn = document.getElementById("exitBtn");
+  document.getElementById("nextBtn").innerText = "Download";
+  document.getElementById("nextBtn").onclick = downloadPDF;
 
-  nextBtn.innerText = "Download PDF";
-  nextBtn.onclick = downloadPDF;
-
-  backBtn.disabled = true;
-  if (exitBtn) exitBtn.disabled = true;
+  document.getElementById("exitBtn").disabled = false;
 }
 
-/* ================= PDF ================= */
+/* ================= DOWNLOAD ================= */
 window.downloadPDF = function () {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  const name = sessionStorage.getItem("studentName") || "Unknown";
+  const name = sessionStorage.getItem("studentName");
 
   let y = 20;
 
-  doc.text("OFFICIAL EXAM PAPER", 60, 10);
+  doc.text("EXAM RESULT", 10, 10);
   doc.text("Student: " + name, 10, y);
   y += 10;
 
   answers.forEach((a, i) => {
+    doc.text(`Q${i + 1}: ${questions[i].question}`, 10, y);
+    y += 7;
+
+    doc.text(`Ans: ${a || ""}`, 10, y);
+    y += 10;
+
     if (y > 270) {
       doc.addPage();
       y = 20;
     }
-
-    doc.text(`Q${i + 1}: ${a.question}`, 10, y);
-    y += 7;
-
-    doc.text(`Ans: ${a.answer}`, 10, y);
-    y += 10;
   });
 
   doc.save("exam.pdf");
 
-  const exitBtn = document.getElementById("exitBtn");
-  if (exitBtn) {
-    exitBtn.disabled = false;
-    exitBtn.onclick = exitExam;
-  }
+  setTimeout(() => {
+    document.getElementById("exitBtn").disabled = false;
+  }, 1000);
 };
 
 /* ================= EXIT ================= */
-window.exitExam = async function () {
-  await signOut(auth);
-
-  localStorage.clear();
-  sessionStorage.clear();
-
+function exitExam() {
+  exitFullscreen();
   location.reload();
-};
-
-/* ================= SAVE ================= */
-function saveState() {
-  localStorage.setItem(STATE_KEY, JSON.stringify({
-    index,
-    answers,
-    timeLeft
-  }));
 }
 
-/* ================= TAB SWITCH AUTO SUBMIT ================= */
+/* ================= TAB SWITCH ================= */
 document.addEventListener("visibilitychange", () => {
   if (!examStarted) return;
 
   if (document.hidden) {
     tabSwitchCount++;
-
-    if (tabSwitchCount >= 2) {
-      alert("Auto submit triggered!");
-      finishExam();
-    } else {
-      alert("Warning: Tab switch detected!");
-    }
+    if (tabSwitchCount >= 2) finishExam();
   }
 });
 
-/* ================= COPY PASTE BLOCK ================= */
+/* ================= COPY BLOCK ================= */
 document.addEventListener("copy", e => e.preventDefault());
 document.addEventListener("paste", e => e.preventDefault());
-document.addEventListener("cut", e => e.preventDefault());
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth, (user) => {
